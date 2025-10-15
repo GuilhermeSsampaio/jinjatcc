@@ -94,13 +94,13 @@ export default function MenuLateral({ children }) {
       {
         label: "Entidades",
         items: [
-          {% for e in entities -%}
+          {% for e in entities if e.name_kebab != 'usuario' -%}
           {
             label: "{{ e.plural }}",
             icon: "pi pi-list",
             command: () => navegar("/{{ e.plural_kebab }}"),
           },
-          {% endfor -%}
+          {% endfor %}
         ],
       },
       {
