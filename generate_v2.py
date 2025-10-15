@@ -115,9 +115,28 @@ def main():
     spec = load_spec(Path(args.spec))
     ctx = build_context(spec)
 
+
     out_root = Path(args.out)
     backend_root = out_root / "backend"
     frontend_root = out_root / "frontend"
+
+    # Limpa backend, preservando node_modules
+    if backend_root.exists():
+        for item in backend_root.iterdir():
+            if item.name != "node_modules":
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
+
+    # Limpa frontend, preservando node_modules
+    if frontend_root.exists():
+        for item in frontend_root.iterdir():
+            if item.name != "node_modules":
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
 
     # Backend: arquivos estáticos
     render_to(env, "backend/package.json.j2", backend_root / "package.json", ctx)

@@ -1,0 +1,97 @@
+{
+  "project": {
+    "name": "Gerenciador de Playlists Musicais",
+    "slug": "playlists-musicais",
+    "description": "Sistema para criar, gerenciar e compartilhar playlists de músicas."
+  },
+  "entities": [
+    {
+      "name": "usuario",
+      "plural": "usuarios",
+      "fields": [
+        {
+          "name": "nome",
+          "type": "string",
+          "column_options": "{ length: 120 }"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "column_options": "{ length: 120, unique: true }"
+        },
+        {
+          "name": "senha",
+          "type": "string",
+          "column_options": "{ length: 255 }"
+        }
+      ]
+    },
+    {
+      "name": "playlist",
+      "plural": "playlists",
+      "fields": [
+        {
+          "name": "nome",
+          "type": "string",
+          "column_options": "{ length: 100 }"
+        },
+        {
+          "name": "descricao",
+          "type": "string",
+          "column_options": "{ length: 255, nullable: true }"
+        },
+        {
+          "name": "privada",
+          "type": "boolean",
+          "column_options": "{ default: false }"
+        }
+      ],
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "target": "usuario",
+          "inverseField": "playlists"
+        }
+      ]
+    },
+    {
+      "name": "musica",
+      "plural": "musicas",
+      "fields": [
+        {
+          "name": "titulo",
+          "type": "string",
+          "column_options": "{ length: 120 }"
+        },
+        {
+          "name": "artista",
+          "type": "string",
+          "column_options": "{ length: 120 }"
+        },
+        {
+          "name": "album",
+          "type": "string",
+          "column_options": "{ length: 120, nullable: true }"
+        },
+        { "name": "duracao", "type": "number" }
+      ]
+    },
+    {
+      "name": "playlist_musica",
+      "plural": "playlist_musicas",
+      "fields": [{ "name": "ordem", "type": "number" }],
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "target": "playlist",
+          "inverseField": "musicas"
+        },
+        {
+          "type": "many-to-one",
+          "target": "musica",
+          "inverseField": "playlists"
+        }
+      ]
+    }
+  ]
+}
