@@ -1,0 +1,104 @@
+import React, { useState } from 'react';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import mostrarToast from '../utilitarios/mostrar_toast';
+
+const FormCadastro{{ entidade.name_pascal }} = () => {
+  const [formData, setFormData] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/{{ entidade.name_kebab }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        mostrarToast('Cadastro realizado com sucesso!', 'sucesso');
+        setFormData({});
+      } else {
+        mostrarToast('Erro ao realizar o cadastro.', 'erro');
+      }
+    } catch (error) {
+      mostrarToast('Erro ao conectar com o servidor.', 'erro');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Campos dinâmicos baseados nos atributos da entidade */}
+      {% for atributo in atributos %}
+      <div key="{{ atributo.name }}">
+        <label htmlFor="{{ atributo.name }}">{{ atributo.label if atributo.label is defined else atributo.name }}</label>
+        <input
+          type="{{ 'text' if atributo.type == 'string' else atributo.type or 'text' }}"
+          id="{{ atributo.name }}"
+          name="{{ atributo.name }}"
+          value={formData["{{ atributo.name }}"] || ''}
+          onChange={handleChange}
+          {% if atributo.required is defined and atributo.required %}required{% endif %}
+        />
+      </div>
+      {% endfor %}
+      <button type="submit">Cadastrar</button>
+    </form>
+  );
+};
+
+const FormularioCadastroEntidade = ({ visivel, aoFechar, aoEnviar }) => {
+  const [dados, setDados] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDados({ ...dados, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    aoEnviar(dados);
+    setDados({}); // Limpar formulário após envio
+    aoFechar();
+  };
+
+  const footer = (
+    <div>
+      <Button label="Cancelar" icon="pi pi-times" onClick={aoFechar} className="p-button-text" />
+      <Button label="Salvar" icon="pi pi-check" onClick={handleSubmit} autoFocus />
+    </div>
+  );
+
+  return (
+    <Dialog header="Cadastrar Entidade" visible={visivel} style={{'{{'}} width: "50vw" {{'}}'}} footer={footer} onHide={aoFechar}>
+      <form onSubmit={handleSubmit}>
+        {% for atributo in atributos %}
+        <div>
+          <label htmlFor="{{ atributo.name }}">{{ atributo.label if atributo.label is defined else atributo.name }}</label>
+          <input
+            type="{{ atributo.type }}"
+            id="{{ atributo.name }}"
+            name="{{ atributo.name }}"
+            value={dados["{{ atributo.name }}"] || ''}
+            onChange={handleChange}
+            {{ 'required' if atributo.required is defined and atributo.required else '' }}
+          />
+        </div>
+        {% endfor %}
+      </form>
+    </Dialog>
+  );
+};
+
+export default FormCadastro{{ entidade.name_pascal }};
+export { FormularioCadastroEntidade };

@@ -116,9 +116,13 @@ def main():
     ctx = build_context(spec)
 
 
+
+
     out_root = Path(args.out)
     backend_root = out_root / "backend"
     frontend_root = out_root / "frontend"
+
+
 
     # Limpa backend, preservando node_modules
     if backend_root.exists():
@@ -129,6 +133,7 @@ def main():
                 else:
                     item.unlink()
 
+
     # Limpa frontend, preservando node_modules
     if frontend_root.exists():
         for item in frontend_root.iterdir():
@@ -137,6 +142,11 @@ def main():
                     shutil.rmtree(item)
                 else:
                     item.unlink()
+
+    # Frontend: rotas protegidas (rotas_usuario_logado.js)
+    rotas_dir = frontend_root / "src" / "rotas"
+    ensure_dir(rotas_dir)
+    render_to(env, "frontend/src/rotas/rotas_usuario_logado.js.j2", rotas_dir / "rotas_usuario_logado.js", ctx)
 
     # Backend: arquivos estáticos
     render_to(env, "backend/package.json.j2", backend_root / "package.json", ctx)
@@ -210,11 +220,8 @@ def main():
     render_to(env, "frontend/src/index.js.j2", frontend_root / "src" / "index.js", ctx)
     render_to(env, "frontend/src/global.css.j2", frontend_root / "src" / "global.css", ctx)
     
-    # Frontend: rotas
-    render_to(env, "frontend/src/rotas/rotas_aplicacao.js.j2",
-              frontend_root / "src" / "rotas" / "rotas_aplicacao.js", ctx)
-    render_to(env, "frontend/src/rotas/rotas_usuario_logado.js.j2",
-              frontend_root / "src" / "rotas" / "rotas_usuario_logado.js", ctx)
+    # Frontend: rotas (agora usando o template Jinja2 para garantir sidebar)
+    render_to(env, "frontend/src/rotas/rotas_aplicacao.js.j2", frontend_root / "src" / "rotas" / "rotas_aplicacao.js", ctx)
 
     # Frontend: componentes
     render_to(env, "frontend/src/componentes/menu_lateral.jsx.j2",
@@ -259,7 +266,7 @@ def main():
     # Frontend: por entidade
     for e in ctx["entities"]:
         if e["name_kebab"] != "usuario":  # Pula usuário pois já foi gerado
-            entity_ctx = {**ctx, "entity": e}
+            entity_ctx = {**ctx, "entity": e, "entidade": e, "atributos": e.get("fields", [])}
             render_to(
                 env,
                 "frontend/src/servicos/servicos_entidade.js.j2",
@@ -272,6 +279,17 @@ def main():
             frontend_root / "src" / "paginas" / e['name_kebab'] / f"{e['name_kebab']}_lista.jsx",
             entity_ctx
         )
+
+    # Frontend: componentes de formulário para entidades
+    for e in ctx["entities"]:
+        if e["name_kebab"] != "usuario":  # Pula usuário pois já foi gerado
+            entity_ctx = {**ctx, "entity": e, "entidade": e, "atributos": e.get("fields", [])}
+            render_to(
+                env,
+                "frontend/src/componentes/TEMPLATE_formulario_entidade.jsx.j2",
+                frontend_root / "src" / "componentes" / f"FormCadastro{e['name_pascal']}.jsx",
+                entity_ctx
+            )
 
     print(f"✓ Projeto gerado com sucesso em: {out_root.resolve()}")
     print(f"\nPróximos passos:")

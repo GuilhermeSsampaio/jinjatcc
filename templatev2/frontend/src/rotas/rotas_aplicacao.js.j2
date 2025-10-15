@@ -4,7 +4,10 @@ import CadastrarUsuario from "../paginas/usuario/cadastrar_usuario";
 import PaginaInicial from "../paginas/usuario/pagina_inicial";
 import RotasUsuariosLogados from "./rotas_usuario_logado";
 {% for e in entities -%}
+{% if e.name_kebab != 'usuario' -%}
 import Pagina{{ e.name_pascal }}Lista from "../paginas/{{ e.name_kebab }}/{{ e.name_kebab }}_lista";
+import FormCadastro{{ e.name_pascal }} from "../componentes/FormCadastro{{ e.name_pascal }}";
+{% endif -%}
 {% endfor -%}
 
 export default function Rotas() {
@@ -18,7 +21,10 @@ export default function Rotas() {
         <Route element={<RotasUsuariosLogados />}>
           <Route element={<PaginaInicial />} path="/pagina-inicial" />
           {% for e in entities -%}
+          {% if e.name_kebab != 'usuario' -%}
           <Route element={<Pagina{{ e.name_pascal }}Lista />} path="/{{ e.plural_kebab }}" />
+          <Route element={<FormCadastro{{ e.name_pascal }} />} path="/{{ e.plural_kebab }}/novo" />
+          {% endif -%}
           {% endfor -%}
         </Route>
       </Routes>

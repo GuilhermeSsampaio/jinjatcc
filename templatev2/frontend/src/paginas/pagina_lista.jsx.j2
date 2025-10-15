@@ -4,11 +4,11 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
 import ContextoUsuario from "../../contextos/contexto_usuario";
 import {
   servicoListar{{ entity.name_pascal }},
   servicoRemover{{ entity.name_pascal }},
+  servicoCriar{{ entity.name_pascal }}
 } from "../../servicos/servicos_{{ entity.name_kebab }}";
 import {
   estilizarBotao,
@@ -23,15 +23,16 @@ import {
   TEMA_PADRAO,
 } from "../../utilitarios/estilos";
 import mostrarToast from "../../utilitarios/mostrar_toast";
+import FormCadastro{{ entity.name_pascal }} from "../../componentes/FormCadastro{{ entity.name_pascal }}";
 
 export default function Pagina{{ entity.name_pascal }}Lista() {
-  const navigate = useNavigate();
   const toastRef = useRef(null);
   const { usuarioLogado } = useContext(ContextoUsuario);
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [mostrarDialogConfirmacao, setMostrarDialogConfirmacao] = useState(false);
+  const [mostrarModalCadastro, setMostrarModalCadastro] = useState(false);
   const corTema = usuarioLogado?.cor_tema || TEMA_PADRAO;
 
   useEffect(() => {
@@ -67,6 +68,16 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
     }
   }
 
+  async function handleCriarEntidade(dados) {
+    try {
+      const novaEntidade = await servicoCriar{{ entity.name_pascal }}(dados);
+      setItens((lista) => [...lista, novaEntidade]);
+      mostrarToast(toastRef, "Cadastro realizado com sucesso!", "sucesso");
+    } catch (erro) {
+      mostrarToast(toastRef, "Erro ao realizar o cadastro.", "erro");
+    }
+  }
+
   function colunaAcoesTemplate(rowData) {
     return (
       <div className={estilizarDivBotoesAcao()}>
@@ -74,14 +85,14 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
           icon="pi pi-pencil"
           className={estilizarBotaoTabela(corTema)}
           tooltip="Editar"
-          tooltipOptions={%raw%}{{ position: "top" }}{%endraw%}
-          onClick={() => navigate(`/{{ entity.plural_kebab }}/${rowData.id}/editar`)}
+          tooltipOptions={% raw %}{{ position: "top" }}{% endraw %}
+          onClick={() => console.log("Editar", rowData)}
         />
         <Button
           icon="pi pi-trash"
           className={estilizarBotaoTabela(corTema, true)}
           tooltip="Remover"
-          tooltipOptions={%raw%}{{ position: "top" }}{%endraw%}
+          tooltipOptions={% raw %}{{ position: "top" }}{% endraw %}
           onClick={() => handleAbrirModalRemocao(rowData)}
         />
       </div>
@@ -112,7 +123,7 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
           label="Novo"
           icon="pi pi-plus"
           className={estilizarBotao(corTema)}
-          onClick={() => navigate("/{{ entity.plural_kebab }}/novo")}
+          onClick={() => setMostrarModalCadastro(true)}
         />
       </div>
 
@@ -138,7 +149,7 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
           headerClassName={estilizarColumnHeader(corTema)}
         />
         <Column 
-          header="Acoes" 
+          header="Ações" 
           body={colunaAcoesTemplate}
           headerClassName={estilizarColumnHeader(corTema)}
         />
@@ -147,15 +158,21 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
       <Dialog
         visible={mostrarDialogConfirmacao}
         onHide={() => setMostrarDialogConfirmacao(false)}
-        header="Confirmar Remocao"
+        header="Confirmar Remoção"
         footer={footerDialog}
-        style={%raw%}{{ width: "350px" }}{%endraw%}
+        style={% raw %}{{ width: "350px" }}{% endraw %}
       >
         <div className="flex align-items-center">
-          <i className="pi pi-exclamation-triangle mr-3" style={%raw%}{{ fontSize: "2rem" }}{%endraw%} />
-          <span>Confirma a remocao do item selecionado?</span>
+          <i className="pi pi-exclamation-triangle mr-3" style={% raw %}{{ fontSize: "2rem" }}{% endraw %} />
+          <span>Confirma a remoção do item selecionado?</span>
         </div>
       </Dialog>
+
+      <FormCadastro{{ entity.name_pascal }}
+        visivel={mostrarModalCadastro}
+        aoFechar={() => setMostrarModalCadastro(false)}
+        aoEnviar={handleCriarEntidade}
+      />
     </div>
   );
 }
