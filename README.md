@@ -1,86 +1,108 @@
-# Gerador de Boilerplate (Express + React) via JSON
+# Gerador de Projeto Fullstack (TypeScript + React)
 
-Este gerador cria automaticamente um projeto full stack JavaScript seguindo o layout:
+Este gerador cria automaticamente a estrutura de um sistema completo com backend em TypeScript (Node.js) e frontend em React, a partir de um arquivo de especificação JSON.
 
-```
-<saida>/
-  backend/
-    package.json
-    src/
-      index.js
-      routes/
-      controllers/
-  frontend/
-    package.json
-    index.html
-    src/
-      main.jsx
-      App.jsx
-      pages/
-      services/
-```
+## Estrutura Gerada
 
-A configuração é feita por um arquivo JSON com `project`, `entities` e `pages`.
+- `backend/` — API REST em TypeScript (Node.js)
+  - `src/entidades/` — Entidades do banco de dados
+  - `src/rotas/` — Rotas da API
+  - `src/servicos/` — Serviços de negócio
+  - `src/middlewares/` — Middlewares de autenticação e validação
+  - `ormconfig.ts` — Configuração do TypeORM
+  - `package.json`, `tsconfig.json`, `.env.example`, `.gitignore`
+- `frontend/` — Aplicação React
+  - `src/componentes/` — Componentes reutilizáveis (inclui menu lateral, formulários dinâmicos, modais)
+  - `src/paginas/` — Páginas de listagem e cadastro para cada entidade
+  - `src/contextos/` — Contextos globais (ex: usuário)
+  - `src/rotas/` — Rotas protegidas e públicas
+  - `src/servicos/` — Serviços de acesso à API
+  - `src/utilitarios/` — Estilos, validações, máscaras, helpers
+  - `public/index.html`, `global.css`, `package.json`, `.env.example`, `.gitignore`
 
-## Requisitos
+## Como Usar
 
-- Python 3.10+
-- Node.js 18+
-- pip install -r requirements.txt
+1. **Prepare o arquivo de especificação** (exemplo: `spec.playlists.example.json`).
+2. **Execute o gerador:**
 
-## Uso
-
-1. Edite `spec.example.json` ou crie o seu arquivo JSON.
-2. Rode:
-
-```bash
-python generate.py spec.example.json --out ./saida
+```sh
+python generate_v2.py spec.playlists.example.json
 ```
 
-3. Inicie os apps:
+- Por padrão, o projeto será gerado na pasta `projetos_gerados`.
 
-```bash
-cd ./saida/backend
-npm install
-npm run dev
+### Gerar em uma nova pasta (nível do script)
 
-cd ../frontend
-npm install
-npm run dev
+Use a flag `--novo=sim` para criar o projeto em uma nova pasta com o nome do projeto (slug) no mesmo nível do script:
+
+```sh
+python generate_v2.py spec.playlists.example.json --novo=sim
 ```
 
-> Para apontar o frontend para o backend, use a env `VITE_API_URL` (por padrão `http://localhost:3001/api`).
+Isso criará, por exemplo, a pasta `playlists-musicais/` com as subpastas `backend/` e `frontend/`.
 
-## Estrutura do JSON
+### Outras opções
+
+- `--out=CAMINHO` — Define o diretório de saída (padrão: `./projetos_gerados`).
+
+## Templates e Customização
+
+Os templates Jinja2 estão em `templatev2/` e podem ser customizados conforme a necessidade:
+
+- Backend: `templatev2/backend/`
+- Frontend: `templatev2/frontend/`
+
+## Exemplo de Especificação (`spec.playlists.example.json`)
 
 ```json
 {
   "project": {
-    "name": "My App",
-    "slug": "my-app"
+    "name": "Gerenciador de Playlists Musicais",
+    "slug": "playlists-musicais",
+    "description": "Sistema para criar, gerenciar e compartilhar playlists de músicas."
   },
   "entities": [
     {
-      "name": "User",
-      "plural": "users",
+      "name": "usuario",
+      "plural": "usuarios",
       "fields": [
-        { "name": "id", "type": "string" },
-        { "name": "name", "type": "string", "required": true }
+        { "name": "nome", "type": "string" },
+        { "name": "email", "type": "string" },
+        { "name": "senha", "type": "string" }
+      ]
+    },
+    {
+      "name": "playlist",
+      "plural": "playlists",
+      "fields": [
+        { "name": "nome", "type": "string" },
+        { "name": "descricao", "type": "string" },
+        { "name": "privada", "type": "boolean" }
+      ],
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "target": "usuario",
+          "inverseField": "playlists"
+        }
       ]
     }
-  ],
-  "pages": [
-    { "component": "Home", "path": "/", "title": "Home" },
-    { "component": "UsersList", "path": "/users", "title": "Users" }
   ]
 }
 ```
 
-- `project.slug` define o prefixo dos `package.json` (frontend/backend).
-- `entities[].plural` é opcional (se ausente, será inferido com `s`).
-- `pages[]` define as rotas do React Router.
+## Observações
 
-## Personalização
+- O gerador ignora a entidade `usuario` para menus e CRUDs genéricos, pois já gera páginas e serviços específicos para autenticação e cadastro de usuário.
+- As tabelas de listagem no frontend são dinâmicas e exibem todos os campos definidos na spec.
+- Os formulários de cadastro também são gerados dinamicamente.
 
-- Ajuste os templates em `templates/backend` e `templates/frontend`.
-- Adicione novos templates por entidade em `templates/backend/entity` e `templates/frontend/page`/`component`.
+## Requisitos
+
+- Python 3.x
+- Node.js e npm (para rodar backend e frontend)
+- Dependências Python: `jinja2`
+
+---
+
+Para dúvidas ou customizações, edite os templates em `templatev2/` ou consulte o código-fonte do gerador.

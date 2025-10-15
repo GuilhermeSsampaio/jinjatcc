@@ -99,6 +99,7 @@ def main():
     parser = argparse.ArgumentParser(description="Gerador v2: TypeScript backend + React frontend")
     parser.add_argument("spec", help="Caminho do arquivo JSON de especificação")
     parser.add_argument("--out", default=DEFAULT_OUTPUT_DIR, help=f"Diretório de saída (default: {DEFAULT_OUTPUT_DIR})")
+    parser.add_argument("--novo", default="nao", help="Se 'sim', gera o projeto em uma nova pasta com o nome do projeto do spec")
     args = parser.parse_args()
 
     root = Path(__file__).parent
@@ -115,14 +116,14 @@ def main():
     spec = load_spec(Path(args.spec))
     ctx = build_context(spec)
 
-
-
-
+    # Se --novo=sim, cria subpasta com o nome do projeto (slug)
     out_root = Path(args.out)
+    if args.novo.lower() == "sim":
+        project_slug = ctx["project"]["slug"]
+        # Cria a pasta no mesmo nível do script, não dentro de projetos_gerados
+        out_root = root / project_slug
     backend_root = out_root / "backend"
     frontend_root = out_root / "frontend"
-
-
 
     # Limpa backend, preservando node_modules
     if backend_root.exists():
