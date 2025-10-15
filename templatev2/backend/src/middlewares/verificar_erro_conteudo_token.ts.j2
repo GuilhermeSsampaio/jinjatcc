@@ -1,0 +1,43 @@
+import md5 from "md5";
+{% if entities|selectattr('name', 'equalto', 'usuario')|list -%}
+import Usuario from "../entidades/usuario";
+{% else -%}
+// Importe a entidade principal de usuário se existir
+{% endif -%}
+
+export default async function verificarErroConteudoToken(
+  request,
+  response,
+  next
+) {
+  try {
+    {% if entities|selectattr('name', 'equalto', 'usuario')|list -%}
+    const cpf_encriptado = md5(request.params.cpf || request.body.cpf);
+    const email_token = request.email_token;
+    if (!email_token) {
+      return response
+        .status(401)
+        .json({ erro: "Token invalido ou nao informado." });
+    }
+    const usuario_token = await Usuario.findOne({
+      where: { email: email_token },
+    });
+    const usuario = await Usuario.findOne({ where: { cpf: cpf_encriptado } });
+
+    if (!usuario_token || !usuario) {
+      return response.status(404).json({ erro: "Usuario nao encontrado." });
+    }
+
+    if (usuario_token.email !== usuario.email) {
+      return response.status(401).json({ erro: "Acesso nao autorizado." });
+    }
+    {% else -%}
+    // Implemente a lógica de verificação do token conforme necessário
+    {% endif -%}
+    next();
+  } catch (error) {
+    return response
+      .status(500)
+      .json({ erro: "Erro ao verificar conteudo do token." });
+  }
+}

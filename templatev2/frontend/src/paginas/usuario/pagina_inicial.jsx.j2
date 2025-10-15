@@ -1,0 +1,48 @@
+import { useContext } from "react";
+import { Card } from "primereact/card";
+import ContextoUsuario from "../../contextos/contexto_usuario";
+import {
+  estilizarCard,
+  estilizarCardHeaderCentralizado,
+} from "../../utilitarios/estilos";
+import { Link } from "react-router-dom";
+
+export default function PaginaInicial() {
+  const { usuarioLogado } = useContext(ContextoUsuario);
+  
+  function HeaderCentralizado() {
+    return (
+      <div className={estilizarCardHeaderCentralizado()}>
+        Bem-vindo, {usuarioLogado?.nome}!
+      </div>
+    );
+  }
+  
+  return (
+    <div className="p-4">
+      <Card
+        header={HeaderCentralizado}
+        className={estilizarCard(usuarioLogado?.cor_tema)}
+      >
+        <div className="flex flex-column align-items-center gap-3 p-4">
+          <h2 className="text-2xl mb-3">Escolha uma seção no menu lateral</h2>
+          <p className="text-center text-bluegray-600">
+            Use o menu à esquerda para navegar entre as diferentes seções do sistema.
+          </p>
+          <ul className="list-none p-0 flex flex-column gap-3 w-full">
+            {% for e in entities -%}
+            <li key="{{ e.plural_kebab }}">
+              <Link
+                to="/{{ e.plural_kebab }}"
+                className="no-underline block p-3 border-round bg-bluegray-100 hover:bg-bluegray-200 transition-colors text-bluegray-800 font-medium shadow-2 text-center"
+              >
+                {{ e.plural }}
+              </Link>
+            </li>
+            {% endfor -%}
+          </ul>
+        </div>
+      </Card>
+    </div>
+  );
+}

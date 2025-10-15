@@ -1,0 +1,32 @@
+import cors from "cors";
+import express from "express";
+import "reflect-metadata";
+import { createConnection } from "typeorm";
+import RotasUsuario from "./rotas/rotas_usuario";
+{% for e in entities -%}
+{% if e.name_kebab != "usuario" -%}
+import Rotas{{ e.name_pascal }} from "./rotas/rotas_{{ e.name_kebab }}";
+{% endif -%}
+{% endfor -%}
+
+const app = express();
+const PORT = process.env.PORT || 3333;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
+
+app.use(cors({ origin: CORS_ORIGIN }));
+app.use(express.json());
+
+// Rotas por entidade
+app.use("/usuarios", RotasUsuario);
+{% for e in entities -%}
+{% if e.name_kebab != "usuario" -%}
+app.use("/{{ e.plural_kebab }}", Rotas{{ e.name_pascal }});
+{% endif -%}
+{% endfor -%}
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
+
+const conexao = createConnection();
+export default conexao;

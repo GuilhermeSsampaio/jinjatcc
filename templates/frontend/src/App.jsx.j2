@@ -1,0 +1,22 @@
+import React from 'react';
+import { Outlet, Link } from 'react-router-dom';
+
+export default function App() {
+  return (
+    <div style="{% raw %}{{ padding: 16, fontFamily: 'Inter, system-ui, Arial' }}{% endraw %}">
+      <header style="{% raw %}{{ marginBottom: 16 }}{% endraw %}">
+        <h1>{{ project.slug }}</h1>
+        <nav>
+          <ul style="{% raw %}{{ display: 'flex', gap: 12, listStyle: 'none', padding: 0 }}{% endraw %}">
+            {% for p in pages -%}
+            <li><Link to="{{ p.route_path }}">{{ p.title or p.component }}</Link></li>
+            {% endfor -%}
+          </ul>
+        </nav>
+      </header>
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  );
+}

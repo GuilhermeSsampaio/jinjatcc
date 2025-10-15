@@ -1,0 +1,28 @@
+import servidor from "./servidor";
+
+const recurso = "/{{ entity.plural_kebab }}";
+
+export async function servicoListar{{ entity.name_pascal }}(params = {}) {
+  const resposta = await servidor.get(recurso, { params });
+  return resposta.data;
+}
+
+export async function servicoBuscar{{ entity.name_pascal }}PorId(id) {
+  const resposta = await servidor.get(`${recurso}/${id}`);
+  return resposta.data;
+}
+
+export async function servicoCriar{{ entity.name_pascal }}(payload) {
+  const resposta = await servidor.post(recurso, payload);
+  return resposta.data;
+}
+
+export async function servicoAtualizar{{ entity.name_pascal }}(id, payload) {
+  const resposta = await servidor.put(`${recurso}/${id}`, payload);
+  return resposta.data;
+}
+
+export async function servicoRemover{{ entity.name_pascal }}(id) {
+  const resposta = await servidor.delete(`${recurso}/${id}`);
+  return resposta.data;
+}

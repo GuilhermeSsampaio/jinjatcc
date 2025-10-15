@@ -1,0 +1,21 @@
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+
+@Entity({ name: "{{ entity.plural_kebab }}" })
+export default class {{ entity.name_pascal }} extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  {% for field in entity.fields -%}
+  @Column({{ field.column_options|default('') }})
+  {{ field.name }}: {{ field.type }};
+
+  {% endfor -%}
+  @CreateDateColumn({ name: "data_criacao" })
+  dataCriacao: Date;
+}

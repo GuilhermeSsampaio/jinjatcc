@@ -1,0 +1,38 @@
+// Controller gerado para {{ entity.name }} ({{ entity.plural }})
+
+let MEMORY_DB = [];
+let AUTO_ID = 1;
+
+export const list = (_req, res) => {
+  res.json(MEMORY_DB);
+};
+
+export const get = (req, res) => {
+  const id = Number(req.params.id);
+  const found = MEMORY_DB.find((it) => it.id === id);
+  if (!found) return res.status(404).json({ message: '{{ entity.name }} not found' });
+  res.json(found);
+};
+
+export const create = (req, res) => {
+  const data = req.body || {};
+  const item = { id: AUTO_ID++, ...data };
+  MEMORY_DB.push(item);
+  res.status(201).json(item);
+};
+
+export const update = (req, res) => {
+  const id = Number(req.params.id);
+  const idx = MEMORY_DB.findIndex((it) => it.id === id);
+  if (idx === -1) return res.status(404).json({ message: '{{ entity.name }} not found' });
+  MEMORY_DB[idx] = { ...MEMORY_DB[idx], ...req.body };
+  res.json(MEMORY_DB[idx]);
+};
+
+export const remove = (req, res) => {
+  const id = Number(req.params.id);
+  const before = MEMORY_DB.length;
+  MEMORY_DB = MEMORY_DB.filter((it) => it.id !== id);
+  if (MEMORY_DB.length === before) return res.status(404).json({ message: '{{ entity.name }} not found' });
+  res.status(204).end();
+};

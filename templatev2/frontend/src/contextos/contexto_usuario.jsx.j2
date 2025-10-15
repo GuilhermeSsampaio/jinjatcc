@@ -1,0 +1,54 @@
+import { createContext, useState, useEffect } from "react";
+
+const ContextoUsuario = createContext();
+
+export default ContextoUsuario;
+
+export function ProvedorUsuario({ children }) {
+  const [usuarioLogado, setUsuarioLogadoState] = useState(null);
+  const [confirmacaoUsuario, setConfirmacaoUsuario] = useState(null);
+  const [mostrarModalConfirmacao, setMostrarModalConfirmacao] = useState(false);
+
+  const [cpfVerificado, setCpfVerificado] = useState(null);
+  const [novaSenha, setNovaSenha] = useState({});
+  const [tokenRecuperacao, setTokenRecuperacao] = useState(null);
+
+  // Carregar usuário do localStorage ao iniciar
+  useEffect(() => {
+    const usuarioSalvo = localStorage.getItem("usuarioLogado");
+    if (usuarioSalvo) {
+      setUsuarioLogadoState(JSON.parse(usuarioSalvo));
+    }
+  }, []);
+
+  // Salvar/remover usuário do localStorage quando mudar
+  const setUsuarioLogado = (usuario) => {
+    setUsuarioLogadoState(usuario);
+    if (usuario && usuario.cadastrado) {
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+    } else {
+      localStorage.removeItem("usuarioLogado");
+    }
+  };
+
+  return (
+    <ContextoUsuario.Provider
+      value={%raw%}{{
+        usuarioLogado,
+        setUsuarioLogado,
+        confirmacaoUsuario,
+        setConfirmacaoUsuario,
+        mostrarModalConfirmacao,
+        setMostrarModalConfirmacao,
+        cpfVerificado,
+        setCpfVerificado,
+        novaSenha,
+        setNovaSenha,
+        tokenRecuperacao,
+        setTokenRecuperacao,
+      }}{%endraw%}
+    >
+      {children}
+    </ContextoUsuario.Provider>
+  );
+}

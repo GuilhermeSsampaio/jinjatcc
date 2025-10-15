@@ -1,0 +1,91 @@
+{
+  "project": {
+    "name": "Sistema de Gestão",
+    "slug": "sistema-gestao"
+  },
+  "entities": [
+    {
+      "name": "usuario",
+      "plural": "usuarios",
+      "fields": [
+        {
+          "name": "nome",
+          "type": "string",
+          "column_options": "{ length: 120 }"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "column_options": "{ length: 120, unique: true }"
+        },
+        {
+          "name": "senha",
+          "type": "string",
+          "column_options": "{ length: 255 }"
+        },
+        {
+          "name": "perfil",
+          "type": "string",
+          "column_options": "{ type: 'enum', enum: ['usuario', 'administrador'], default: 'usuario' }"
+        }
+      ]
+    },
+    {
+      "name": "produto",
+      "plural": "produtos",
+      "fields": [
+        {
+          "name": "nome",
+          "type": "string",
+          "column_options": "{ length: 200 }"
+        },
+        {
+          "name": "descricao",
+          "type": "string",
+          "column_options": "{ type: 'text', nullable: true }"
+        },
+        {
+          "name": "preco",
+          "type": "number",
+          "column_options": "{ type: 'decimal', precision: 10, scale: 2 }"
+        },
+        {
+          "name": "quantidade",
+          "type": "number",
+          "column_options": "{ type: 'int', default: 0 }"
+        },
+        {
+          "name": "ativo",
+          "type": "boolean",
+          "column_options": "{ default: true }"
+        }
+      ]
+    },
+    {
+      "name": "pedido",
+      "plural": "pedidos",
+      "fields": [
+        {
+          "name": "numero",
+          "type": "string",
+          "column_options": "{ length: 50, unique: true }"
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "column_options": "{ type: 'decimal', precision: 10, scale: 2 }"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "column_options": "{ type: 'enum', enum: ['pendente', 'processando', 'concluido', 'cancelado'], default: 'pendente' }"
+        },
+        {
+          "name": "observacoes",
+          "type": "string",
+          "column_options": "{ type: 'text', nullable: true }"
+        }
+      ]
+    }
+  ]
+}

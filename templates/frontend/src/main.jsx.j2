@@ -1,0 +1,25 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './App.jsx';
+{% for p in pages -%}
+import {{ p.component }} from './pages/{{ p.component }}.jsx';
+{% endfor %}
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      {% for p in pages -%}
+      { path: '{{ p.route_path }}', element: <{{ p.component }} /> },
+      {% endfor -%}
+    ]
+  }
+]);
+
+createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);

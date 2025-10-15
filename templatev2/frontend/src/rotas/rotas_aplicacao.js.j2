@@ -1,0 +1,27 @@
+import { Route, BrowserRouter, Routes } from "react-router-dom";
+import LogarUsuario from "../paginas/usuario/logar_usuario";
+import CadastrarUsuario from "../paginas/usuario/cadastrar_usuario";
+import PaginaInicial from "../paginas/usuario/pagina_inicial";
+import RotasUsuariosLogados from "./rotas_usuario_logado";
+{% for e in entities -%}
+import Pagina{{ e.name_pascal }}Lista from "../paginas/{{ e.name_kebab }}/{{ e.name_kebab }}_lista";
+{% endfor -%}
+
+export default function Rotas() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<LogarUsuario />} path="/" />
+        <Route element={<CadastrarUsuario />} path="/criar-usuario" />
+        
+        {/* Rotas protegidas com sidebar */}
+        <Route element={<RotasUsuariosLogados />}>
+          <Route element={<PaginaInicial />} path="/pagina-inicial" />
+          {% for e in entities -%}
+          <Route element={<Pagina{{ e.name_pascal }}Lista />} path="/{{ e.plural_kebab }}" />
+          {% endfor -%}
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}

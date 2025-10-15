@@ -1,0 +1,277 @@
+import { useContext, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { Divider } from "primereact/divider";
+import { Dropdown } from "primereact/dropdown";
+import { InputMask } from "primereact/inputmask";
+import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
+import { Toast } from "primereact/toast";
+import ContextoUsuario from "../../contextos/contexto_usuario";
+import { servicoCadastrarUsuario, servicoVerificarCpfExistente } from "../../servicos/servicos_usuario";
+import mostrarToast from "../../utilitarios/mostrar_toast";
+import { CPF_MASCARA } from "../../utilitarios/mascaras";
+import { useNavigate } from "react-router-dom";
+import {
+  MostrarMensagemErro,
+  checarListaVazia,
+  validarCampoEmail,
+  validarCamposObrigatorios,
+  validarConfirmacaoSenha,
+} from "../../utilitarios/validacoes";
+
+import {
+  TAMANHOS,
+  TEMA_PADRAO,
+  estilizarBotao,
+  estilizarCard,
+  estilizarDivCampo,
+  estilizarDivider,
+  estilizarDropdown,
+  estilizarFlex,
+  estilizarInputMask,
+  estilizarInputText,
+  estilizarLabel,
+  estilizarLink,
+  estilizarPasswordInput,
+  estilizarPasswordTextInputBorder,
+  estilizarSubtitulo,
+  opcoesCores,
+} from "../../utilitarios/estilos";
+
+export default function CadastrarUsuario() {
+  const referenciaToast = useRef(null);
+  const { setUsuarioLogado } = useContext(ContextoUsuario);
+  const navegar = useNavigate();
+
+  const [dados, setDados] = useState({
+    cpf: "",
+    nome: "",
+    perfil: "usuario",
+    email: "",
+    senha: "",
+    confirmacao: "",
+    questao: "",
+    resposta: "",
+    cor_tema: TEMA_PADRAO,
+  });
+
+  const [erros, setErros] = useState({});
+
+  const opcoesPerfis = [
+    { label: "Usuario", value: "usuario" },
+    { label: "Administrador", value: "administrador" },
+  ];
+
+  function alterarEstado(event) {
+    const chave = event.target.name;
+    const valor = event.target.value;
+    setDados({ ...dados, [chave]: valor });
+  }
+
+  function validarCampos() {
+    const { perfil, cpf, nome, questao, resposta, senha, confirmacao, email } = dados;
+
+    const camposObrigatorios = {
+      cpf,
+      nome,
+      questao,
+      resposta,
+      senha,
+      confirmacao,
+      email,
+    };
+
+    let errosCamposObrigatorios = validarCamposObrigatorios(camposObrigatorios);
+    let errosValidacaoEmail = validarCampoEmail(email);
+    let errosConfirmacaoSenha = validarConfirmacaoSenha(senha, confirmacao);
+
+    setErros({
+      ...errosCamposObrigatorios,
+      ...errosConfirmacaoSenha,
+      ...errosValidacaoEmail,
+    });
+
+    return (
+      checarListaVazia(errosCamposObrigatorios) &&
+      checarListaVazia(errosConfirmacaoSenha) &&
+      checarListaVazia(errosValidacaoEmail)
+    );
+  }
+
+  async function cadastrarUsuario() {
+    const camposValidos = validarCampos();
+    if (camposValidos) {
+      try {
+        const response = await servicoVerificarCpfExistente(dados.cpf);
+        
+        const responseCadastro = await servicoCadastrarUsuario(dados);
+        const usuarioLogado = responseCadastro.data?.usuarioLogado;
+        
+        if (!usuarioLogado) {
+          throw new Error("Resposta invalida do servidor.");
+        }
+
+        setUsuarioLogado({
+          ...usuarioLogado,
+          cpf: dados.cpf,
+          cadastrado: true,
+        });
+
+        mostrarToast(referenciaToast, "Usuario cadastrado com sucesso!", "sucesso");
+        setTimeout(() => navegar("/pagina-inicial"), 1500);
+      } catch (error) {
+        const mensagemErro =
+          error.response?.data?.erro ||
+          error.message ||
+          "Nao foi possivel realizar o cadastro.";
+        mostrarToast(referenciaToast, mensagemErro, "erro");
+      }
+    }
+  }
+
+  return (
+    <div className={estilizarFlex("center")}>
+      <Toast ref={referenciaToast} position="bottom-center" />
+
+      <Card title="Cadastrar Usuario" className={estilizarCard(dados.cor_tema)}>
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Tipo de Perfil:</label>
+          <Dropdown
+            name="perfil"
+            className={estilizarDropdown(erros.perfil, dados.cor_tema)}
+            value={dados.perfil}
+            options={opcoesPerfis}
+            onChange={alterarEstado}
+            placeholder="Usuario"
+          />
+          <MostrarMensagemErro mensagem={erros.perfil} />
+        </div>
+        
+        <Divider className={estilizarDivider(dados.cor_tema)} />
+        <h2 className={estilizarSubtitulo(dados.cor_tema)}>Dados Pessoais</h2>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>CPF*:</label>
+          <InputMask
+            name="cpf"
+            autoClear
+            className={estilizarInputMask(erros.cpf, dados.cor_tema)}
+            mask={CPF_MASCARA}
+            size={TAMANHOS.CPF}
+            value={dados.cpf}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.cpf} />
+        </div>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Nome Completo*:</label>
+          <InputText
+            name="nome"
+            className={estilizarInputText(erros.nome, 400, dados.cor_tema)}
+            value={dados.nome}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.nome} />
+        </div>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Email*:</label>
+          <InputText
+            name="email"
+            className={estilizarInputText(erros.email, 400, dados.cor_tema)}
+            value={dados.email}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.email} />
+        </div>
+        
+        <Divider className={estilizarDivider(dados.cor_tema)} />
+        <h2 className={estilizarSubtitulo(dados.cor_tema)}>Dados de Login</h2>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Senha e Confirmacao*:</label>
+          <Password
+            name="senha"
+            inputClassName={estilizarPasswordTextInputBorder(erros.senha, dados.cor_tema)}
+            className={estilizarPasswordInput(erros.senha)}
+            toggleMask
+            value={dados.senha}
+            onChange={alterarEstado}
+            size={TAMANHOS.SENHA}
+          />
+          <Password
+            name="confirmacao"
+            className={estilizarPasswordInput(dados.cor_tema)}
+            toggleMask
+            inputClassName={estilizarPasswordTextInputBorder(
+              erros.senha || erros.confirmacao_senha,
+              dados.cor_tema
+            )}
+            size={TAMANHOS.SENHA}
+            feedback={false}
+            value={dados.confirmacao}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.senha || erros.confirmacao_senha} />
+        </div>
+        
+        <Divider className={estilizarDivider(dados.cor_tema)} />
+        <h2 className={estilizarSubtitulo(dados.cor_tema)}>Recuperacao da conta</h2>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Questao de Seguranca*:</label>
+          <InputText
+            name="questao"
+            className={estilizarInputText(erros.questao, 400, dados.cor_tema)}
+            placeholder="Ex: Qual era o nome do meu primeiro pet?"
+            value={dados.questao}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.questao} />
+        </div>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Resposta*:</label>
+          <InputText
+            name="resposta"
+            className={estilizarInputText(erros.resposta, 400, dados.cor_tema)}
+            value={dados.resposta}
+            onChange={alterarEstado}
+          />
+          <MostrarMensagemErro mensagem={erros.resposta} />
+        </div>
+        
+        <Divider className={estilizarDivider(dados.cor_tema)} />
+        <h2 className={estilizarSubtitulo(dados.cor_tema)}>Configuracoes*:</h2>
+        
+        <div className={estilizarDivCampo()}>
+          <label className={estilizarLabel(dados.cor_tema)}>Cor do Tema*:</label>
+          <Dropdown
+            name="cor_tema"
+            className={estilizarDropdown(erros.cor_tema, dados.cor_tema)}
+            value={dados.cor_tema}
+            options={opcoesCores}
+            onChange={alterarEstado}
+            placeholder="-- Selecione --"
+          />
+          <MostrarMensagemErro mensagem={erros.cor_tema} />
+        </div>
+        
+        <Button
+          className={estilizarBotao(dados.cor_tema)}
+          label="Salvar"
+          onClick={cadastrarUsuario}
+        />
+        
+        <div className={estilizarFlex("center")}>
+          <Link to="/" className={estilizarLink(dados.cor_tema)}>
+            Retornar para login
+          </Link>
+        </div>
+      </Card>
+    </div>
+  );
+}

@@ -1,0 +1,15 @@
+import { Router } from "express";
+import Servicos{{ entity.name_pascal }} from "../servicos/servicos_{{ entity.name_kebab }}";
+import verificarToken from "../middlewares/verificar_token";
+
+const Rotas{{ entity.name_pascal }} = Router();
+export default Rotas{{ entity.name_pascal }};
+
+// Rotas públicas
+Rotas{{ entity.name_pascal }}.get("/", Servicos{{ entity.name_pascal }}.listar);
+Rotas{{ entity.name_pascal }}.get("/:id", Servicos{{ entity.name_pascal }}.buscarPorId);
+
+// Rotas protegidas
+Rotas{{ entity.name_pascal }}.post("/", verificarToken, Servicos{{ entity.name_pascal }}.criar);
+Rotas{{ entity.name_pascal }}.put("/:id", verificarToken, Servicos{{ entity.name_pascal }}.atualizar);
+Rotas{{ entity.name_pascal }}.delete("/:id", verificarToken, Servicos{{ entity.name_pascal }}.remover);

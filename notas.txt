@@ -1,0 +1,2 @@
+ver oq fazer com relacionamentos no template
+fazer o app sempre rodar na mesma pasta pra n ter q ficar baixando npm i

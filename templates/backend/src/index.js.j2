@@ -1,0 +1,21 @@
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Healthcheck
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Rotas geradas por entidade
+{% for e in entities -%}
+import {{ e.name_camel }}Routes from './routes/{{ e.plural_kebab }}.routes.js';
+app.use('/api/{{ e.plural_kebab }}', {{ e.name_camel }}Routes);
+{% endfor %}
+
+// Porta
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`[backend] listening on http://localhost:${PORT}`);
+});
