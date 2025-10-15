@@ -115,6 +115,29 @@ export default function MenuLateral({ children }) {
     return menuItems;
   }
 
+  function TabelaDinamica({ entidade, dados }) {
+    return (
+      <table>
+        <thead>
+          <tr>
+            {entidade.fields.map((campo) => (
+              <th key={campo.nome}>{campo.nome}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {dados.map((item, index) => (
+            <tr key={index}>
+              {entidade.fields.map((campo) => (
+                <td key={campo.nome}>{item[campo.nome]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   return (
     <div className={estilizarGridSidebar(usuarioLogado?.cor_tema)}>
       <div className={estilizarGridColunaSidebar()}>

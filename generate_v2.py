@@ -283,7 +283,13 @@ def main():
     # Frontend: componentes de formulário para entidades
     for e in ctx["entities"]:
         if e["name_kebab"] != "usuario":  # Pula usuário pois já foi gerado
-            entity_ctx = {**ctx, "entity": e, "entidade": e, "atributos": e.get("fields", [])}
+            entity_ctx = {
+                **ctx,
+                "entity": e,
+                "entidade": e,
+                "atributos": e.get("fields", []),
+                "fields": e.get("fields", [])  # Adiciona os campos ao contexto
+            }
             render_to(
                 env,
                 "frontend/src/componentes/TEMPLATE_formulario_entidade.jsx.j2",

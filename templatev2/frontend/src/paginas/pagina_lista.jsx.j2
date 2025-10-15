@@ -136,20 +136,18 @@ export default function Pagina{{ entity.name_pascal }}Lista() {
         responsiveLayout="stack"
         className={estilizarDataTable()}
       >
-        <Column 
-          field="id" 
-          header="ID" 
-          sortable 
-          headerClassName={estilizarColumnHeader(corTema)}
-        />
-        <Column 
-          field="nome" 
-          header="Nome" 
-          sortable 
-          headerClassName={estilizarColumnHeader(corTema)}
-        />
-        <Column 
-          header="Ações" 
+        {itens.length > 0 &&
+          Object.keys(itens[0]).map((campo) => (
+            <Column
+              key={campo}
+              field={campo}
+              header={campo.charAt(0).toUpperCase() + campo.slice(1)}
+              sortable
+              headerClassName={estilizarColumnHeader(corTema)}
+            />
+          ))}
+        <Column
+          header="Ações"
           body={colunaAcoesTemplate}
           headerClassName={estilizarColumnHeader(corTema)}
         />
